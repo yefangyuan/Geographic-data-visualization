@@ -1,0 +1,111 @@
+*{padding: 0;margin: 0;}
+body {
+  font-family: "微软雅黑", Arial, sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #7f7f7f;
+}
+html,body{
+    height:100%
+}
+
+a {color: #43CF76;text-decoration: none;}
+a:hover, a:active, a:focus {color: #43CF76;text-decoration: none;}
+h1,h2,h3,h4,h5,h6{color: #000;}
+
+/* index.html */
+#page {padding: 2em 0;}
+.page-title {padding-bottom: 2em;}
+.page-title p{font-size: 20px;line-height: 1.5;}
+.page-section {margin-bottom: 30px;float: left;width: 100%;}
+.page-section h3 {font-size: 18px;margin-bottom: 10px;}
+.page-section img {margin-bottom: 20px;}
+.page-section .img-bordered {
+  border: 5px solid #fff;
+  -webkit-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
+}
+.btn {margin: 4px;font-size: 16px;font-weight: 500;padding: 8px 20px;background: #fff;color: #43CF76;border: 2px solid #43CF76;}
+.btn:hover, .btn:focus, .btn:active {background: #43CF76;color: #fff;outline:0;}
+
+/* upload.html */
+#upload {padding: 2em 0;}
+ol.ul-style li {
+    padding: 0;
+    padding-left: 10px;
+    line-height: 1.5;
+    margin: 0 0 10px 0;
+    position: relative;
+}
+.warning{color: #43CF76;}
+.btn-lg{font-size: 20px;font-weight: 700;padding: 15px 80px;margin-top: 30px}
+.upload-img{width: 90%;margin:0 auto;padding-top: 10px;}
+#file{}
+
+
+#footer {clear:both;background-color:rgb(6,19,37);padding:30px 0;margin-top: 20px;}
+
+
+.container-fluid {padding:20px;}
+.sidebar-nav {padding:5px 5px;margin-bottom:10px;}
+.main {overflow:hidden;padding:10px;margin-bottom:10px;border:1px solid #e3e3e3;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;-webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,0.05);-moz-box-shadow:inset 0 1px 1px rgba(0,0,0,0.05);box-shadow:inset 0 1px 1px rgba(0,0,0,0.05);}
+#main{    background-color: rgb(247, 247, 247);}
+
+
+/* path:hover{fill:#43CF76;} */
+
+#tooltip{position:absolute;width:150px;height:auto;padding:5px;background-color:#fff;-webkit-border-radius:10px;-moz-border-radius:10px;border-radius:10px;-webkit-box-shadow:4px 4px 10px rgba(0,0,0,.4);-moz-box-shadow:4px 4px 10px rgba(0,0,0,.4);box-shadow:4px 4px 10px rgba(0,0,0,.4);pointer-events:none;z-index:3}
+#tooltip.hidden{display:none}
+#tooltip p{margin:0;font-family:sans-serif;line-height:20px}
+
+
+#table{border-radius: 5px;}
+table tr td:hover {
+  font-weight: bold;
+  color: #43CF76;
+  cursor: pointer;
+}
+table tr td:hover {
+  font-weight: bold;
+  color: #43CF76;
+  cursor: pointer;
+}
+tr:nth-of-type(odd) { 
+	background: #eee; 
+}
+th { 
+	background: #43CF76; 
+	color: white; 
+	font-weight: bold; 
+	cursor: s-resize;
+	background-repeat: no-repeat;
+    background-position: 3% center;
+}
+td, th { 
+	padding: 6px; 
+	border: 1px solid #ccc; 
+	text-align: left; 
+	 white-space: nowrap;
+}
+
+th.des:after {
+  content: "\21E9";
+}
+
+th.aes:after {
+  content: "\21E7";
+}
+
+
+.form-group {margin: 10px 0;}
+    .label{font-size: 14px;background: #43CF76;width: 80px;
+    padding: 5px 10px;}
+    #workspace{padding: 5px}
+    #workspace div{margin-bottom: 6px}
+body#map{
+	  color: #000;
+}

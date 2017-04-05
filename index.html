@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Home</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<script src="js/jquery.min.js"></script>
+</head>
+<body>
+	<div id="page">
+		<div class="container">
+			<div class="row page-title">
+				<div class="col-md-8 col-md-offset-2 text-center">
+					<h1>基于D3的地图数据可视化系统的设计</h1>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-4">
+					<div class="page-section text-center">
+						<img src="images/type1.png" class="img-responsive img-bordered">
+						<h3>省级标准标记地图</h3>
+						<p>不需要传入数据，生成一幅带有省级名称标记的标准中国地图。</p>
+						<p><a onclick="send(this) " class="btn" title="1">上传数据</a></p>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="page-section text-center">
+						<img src="images/type1.png" class="img-responsive img-bordered">
+						<h3>省级分段设色地图</h3>
+						<p>将数据中的一列值，按照某种方法，划分为多个范围段，每个范围赋予不同的颜色，生成一幅地图。</p>
+						<p><a onclick="send(this)" class="btn" title="2">上传数据</a></p>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="page-section text-center">
+						<img src="images/type1.png" class="img-responsive img-bordered">
+						<h3>省级等级符号地图</h3>
+						<p>将数据中的一列值，根据数值的大小，绘制不同等级的圆形符号（气泡），生成一幅专题地图。</p>
+						<p><a onclick="send(this)" class="btn" title="3">上传数据</a></p>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="page-section text-center">
+						<img src="images/type1.png" class="img-responsive img-bordered">
+						<h3>省级柱状统计地图</h3>
+						<p>将数据中的多列适合比较的值，根据数值的大小，绘制成柱状统计符号，生成一幅专题地图。</p>
+						<p><a onclick="send(this)" class="btn" title="4">上传数据</a></p>
+					</div>
+				</div>
+
+				<div class="col-md-4">
+					<div class="page-section text-center">
+						<img src="images/type1.png" class="img-responsive img-bordered">
+						<h3>省级饼状对比地图</h3>
+						<p>将多列相关数据做成饼图，在地图上显示。</p>
+						<p><a onclick="send(this)" class="btn" title="5">上传数据</a></p>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="page-section text-center">
+						<img src="images/type1.png" class="img-responsive img-bordered">
+						<h3>省级柱状对比地图</h3>
+						<p>将多列相关数据做成柱状图，在地图上显示。</p>
+						<p><a onclick="send(this)" class="btn" title="6">上传数据</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		function send(ele){
+			var url = "upload.html";
+			window.open(encodeURI(url + "?type=" + ele.title)); 
+		}
+	</script>
+</body>
+</html>
