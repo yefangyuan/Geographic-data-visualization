@@ -1,2 +1,2 @@
 # Geographic-data-visualization
-China map data suitable for D3.js visualizations.
+基于D3的地理信息可视化系统的设计
