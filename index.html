@@ -2,78 +2,346 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Home</title>
+	<title>Map</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="stylesheet" type="text/css" href="css/jquery.minicolors.css">
 	<script src="js/jquery.min.js"></script>
+	<script src="js/d3.min.js"></script>
+    <script src="js/topojson.v1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
 </head>
-<body>
-	<div id="page">
-		<div class="container">
-			<div class="row page-title">
-				<div class="col-md-8 col-md-offset-2 text-center">
-					<h1>基于D3的地图数据可视化系统的设计</h1>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-4">
-					<div class="page-section text-center">
-						<img src="images/type1.png" class="img-responsive img-bordered">
-						<h3>省级标准标记地图</h3>
-						<p>不需要传入数据，生成一幅带有省级名称标记的标准中国地图。</p>
-						<p><a onclick="send(this) " class="btn" title="1">上传数据</a></p>
-					</div>
-				</div>
-				<div class="col-md-4">
-					<div class="page-section text-center">
-						<img src="images/type1.png" class="img-responsive img-bordered">
-						<h3>省级分段设色地图</h3>
-						<p>将数据中的一列值，按照某种方法，划分为多个范围段，每个范围赋予不同的颜色，生成一幅地图。</p>
-						<p><a onclick="send(this)" class="btn" title="2">上传数据</a></p>
-					</div>
-				</div>
-				<div class="col-md-4">
-					<div class="page-section text-center">
-						<img src="images/type1.png" class="img-responsive img-bordered">
-						<h3>省级等级符号地图</h3>
-						<p>将数据中的一列值，根据数值的大小，绘制不同等级的圆形符号（气泡），生成一幅专题地图。</p>
-						<p><a onclick="send(this)" class="btn" title="3">上传数据</a></p>
-					</div>
-				</div>
-				<div class="col-md-4">
-					<div class="page-section text-center">
-						<img src="images/type1.png" class="img-responsive img-bordered">
-						<h3>省级柱状统计地图</h3>
-						<p>将数据中的多列适合比较的值，根据数值的大小，绘制成柱状统计符号，生成一幅专题地图。</p>
-						<p><a onclick="send(this)" class="btn" title="4">上传数据</a></p>
-					</div>
-				</div>
+<body class="map">
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="#">基于D3的地理数据可视化系统</a>
+    </div>
+    <div>
+        <form class="navbar-form navbar-left">
+            <div class="form-group">
+                <select class="form-control" id="type-select">
+                    <option title="1">省级标准标记地图</option>
+                    <option title="2">省级分段设色地图</option>
+                    <option title="3">省级等级符号地图</option>
+                    <option title="4">省级柱状统计地图</option>
+                    <option title="5">省级饼状对比地图</option>
+                    <option title="6">省级柱状对比地图</option>
+                </select>
+            </div>
+        </form>
+        <form class="navbar-form navbar-left">
+            <a href="javascript:;" class="file">上传数据<input type="file" id="upload"></a>
+            <a href="javascript:;" id="reset" class="btn btn-default">清空</a>
+            <a href="javascript:;" id="save" class="btn btn-default">另存为图片</a>
+        </form>
+    </div>
+</nav>
 
-				<div class="col-md-4">
-					<div class="page-section text-center">
-						<img src="images/type1.png" class="img-responsive img-bordered">
-						<h3>省级饼状对比地图</h3>
-						<p>将多列相关数据做成饼图，在地图上显示。</p>
-						<p><a onclick="send(this)" class="btn" title="5">上传数据</a></p>
-					</div>
-				</div>
-				<div class="col-md-4">
-					<div class="page-section text-center">
-						<img src="images/type1.png" class="img-responsive img-bordered">
-						<h3>省级柱状对比地图</h3>
-						<p>将多列相关数据做成柱状图，在地图上显示。</p>
-						<p><a onclick="send(this)" class="btn" title="6">上传数据</a></p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<script>
-		function send(ele){
-			var url = "upload.html";
-			window.open(encodeURI(url + "?type=" + ele.title)); 
-		}
-	</script>
+
+        
+<div class="sidebar-nav">
+    <div class="accordion-group">
+        <div class="accordion-heading">
+          <a class="accordion-toggle" data-toggle="collapse" href="#collapse1">主配置</a>
+        </div>
+        <div id="collapse1" class="accordion-body collapse" style="height: 0px;">
+          <div class="accordion-inner">
+                <span class="label label-primary">面板背景</span>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#ffffff" />
+                </div>
+                <span class="label label-primary">地图背景</span>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#cccccc">
+                    <input type="range" value="1" class="opacity" max="1" min="0" step="0.1" />
+                </div>
+                <span class="label label-primary">边界</span>
+                <div class="input-group input-group-md">
+                    <input type="text" class="form-control" value="0.2">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#ffffff" />
+                </div>
+                <span class="label label-primary">文字</span>
+                <div class="input-group input-group-md">
+                    <input type="text" class="form-control" value="12">
+                    <span class="input-group-addon">px</span>
+                </div> 
+            </div>
+        </div>
+    </div>
+    <div class="accordion-group">
+        <div class="accordion-heading">
+          <a class="accordion-toggle" data-toggle="collapse" href="#collapse2">子配置</a>
+        </div>
+        <div id="collapse2" class="accordion-body collapse" style="height: 0px;">
+            <div class="accordion-inner" id="type1"  style="display: block;"></div>
+            <div class="accordion-inner" id="type2"  style="display: none;">
+                <span class="label label-primary">最深填充颜色</span>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#016FDD" />
+                </div>
+                <span class="label label-primary">最浅填充颜色</span>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#F7F7F7" />
+                </div>
+                <span class="label label-primary">脚注偏移</span>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">X轴</span>
+                    <input type="text" class="form-control" value="50">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">Y轴</span>
+                    <input type="text" class="form-control" value="450">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <span class="label label-primary">脚注宽高</span>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">宽度</span>
+                    <input type="text" class="form-control" value="150">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">高度</span>
+                    <input type="text" class="form-control" value="30">
+                    <span class="input-group-addon">px</span>
+                </div>
+            </div>
+            <div class="accordion-inner" id="type3"  style="display: none;">
+                <span class="label label-primary">分段级数</span>
+                <div class="form-group">
+                    <select class="circle input-group">
+                        <option value ="1">1&nbsp;&nbsp;级</option>
+                        <option value ="2" selected>2&nbsp;&nbsp;级</option>
+                        <option value="3">3&nbsp;&nbsp;级</option>
+                        <option value="4">4&nbsp;&nbsp;级</option>
+                        <option value="5">5&nbsp;&nbsp;级</option>
+                    </select>
+                </div>
+                <span class="label label-primary">分段颜色</span>
+                <div class="form-group">
+                    <input type="text" class="form-control colorPick" value="#016FDD">
+                    <input type="text" class="form-control colorPick" value="#CC0000">
+                    <input type="text" class="form-control colorPick">
+                    <input type="text" class="form-control colorPick">
+                    <input type="text" class="form-control colorPick">
+                    <input type="range" value="0.8" class="opacity" max="1" min="0" step="0.1" />
+                </div>
+                <span class="label label-primary">脚注</span>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">X偏移</span>
+                    <input type="text" class="form-control" value="20">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">Y偏移</span>
+                    <input type="text" class="form-control" value="40">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">宽度</span>
+                    <input type="text" class="form-control" value="30">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">高度</span>
+                    <input type="text" class="form-control" value="15">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">X间距</span>
+                    <input type="text" class="form-control" value="5">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">Y间距</span>
+                    <input type="text" class="form-control" value="20">
+                    <span class="input-group-addon">px</span>
+                </div>
+            </div>
+            <div class="accordion-inner" id="type4"  style="display: none;">
+                <span class="label label-primary">单柱</span>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">宽度</span>
+                    <input type="text" class="form-control" value="12">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">最大高度</span>
+                    <input type="text" class="form-control" value="50">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#005DAA">
+                    <input type="range" value="1" class="opacity" max="1" min="0" step="0.1" />
+                </div>
+            </div>
+            <div class="accordion-inner" id="type5"  style="display: none;">
+                <span class="label label-primary">名称点</span>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#005DAA">
+                    <input type="range" value="1" class="opacity" max="1" min="0" step="0.1" />
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">半径</span>
+                    <input type="text" class="form-control" value="5">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <span class="label label-primary">分区颜色</span>
+                <div class="form-group">
+                    <input type="text" class="form-control colorPick" value="#FF4040">
+                    <input type="text" class="form-control colorPick" value="#EEC900">
+                    <input type="text" class="form-control colorPick" value="#D1EEEE">
+                    <input type="text" class="form-control colorPick" value="#A020F0">
+                    <input type="text" class="form-control colorPick" value="#87CEEB">
+                    <input type="text" class="form-control colorPick" value="#7CCD7C">
+                    <input type="text" class="form-control colorPick" value="#EE9A00">
+                    <input type="text" class="form-control colorPick" value="#A0522D">
+                </div>
+                <span class="label label-primary">脚注</span>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">X偏移</span>
+                    <input type="text" class="form-control" value="40">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">Y偏移</span>
+                    <input type="text" class="form-control" value="40">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">宽度</span>
+                    <input type="text" class="form-control" value="30">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">高度</span>
+                    <input type="text" class="form-control" value="15">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">X间距</span>
+                    <input type="text" class="form-control" value="10">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">Y间距</span>
+                    <input type="text" class="form-control" value="20">
+                    <span class="input-group-addon">px</span>
+                </div>
+            </div>
+            <div class="accordion-inner" id="type6"  style="display: none;">
+                <span class="label label-primary">名称点</span>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#005DAA">
+                    <input type="range" value="1" class="opacity" max="1" min="0" step="0.1" />
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">半径</span>
+                    <input type="text" class="form-control" value="5">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <span class="label label-primary">单柱</span>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">宽度</span>
+                    <input type="text" class="form-control" value="15">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">最大高度</span>
+                    <input type="text" class="form-control" value="80">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <span class="label label-primary">单柱颜色</span>
+                <div class="form-group">
+                    <input type="text" class="form-control colorPick" value="#FF4040">
+                    <input type="text" class="form-control colorPick" value="#EEC900">
+                    <input type="text" class="form-control colorPick" value="#D1EEEE">
+                    <input type="text" class="form-control colorPick" value="#A020F0">
+                    <input type="text" class="form-control colorPick" value="#87CEEB">
+                    <input type="text" class="form-control colorPick" value="#7CCD7C">
+                    <input type="text" class="form-control colorPick" value="#EE9A00">
+                    <input type="text" class="form-control colorPick" value="#A0522D">
+                </div>
+                <span class="label label-primary">脚注</span>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">X偏移</span>
+                    <input type="text" class="form-control" value="40">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">Y偏移</span>
+                    <input type="text" class="form-control" value="40">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">宽度</span>
+                    <input type="text" class="form-control" value="30">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">高度</span>
+                    <input type="text" class="form-control" value="15">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">X间距</span>
+                    <input type="text" class="form-control" value="10">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">Y间距</span>
+                    <input type="text" class="form-control" value="20">
+                    <span class="input-group-addon">px</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="content">
+    <div id="main" style="min-height: 575px;"></div> 
+</div>
+</div>
+<div class="data">
+    <div id="table" class="table-responsive" style="min-height: 580px;"></div>
+</div>
+<!-- 提示框 -->
+<div id="tooltip">
+    <div><strong id="data-name"></strong> <span id="data-name-tooltip"></span></div>
+    <div><strong id="data-value"></strong> <span id="data-value-tooltip"></span></div>
+</div>
+<script type="text/javascript">
+    $(function () { 
+        $('#collapseOne').collapse('hide');
+            $('.colorPick').each( function() {
+                $(this).minicolors({
+                    control: $(this).attr('data-control') || 'hue',
+                    defaultValue: $(this).attr('data-defaultValue') || '',
+                    format: $(this).attr('data-format') || 'hex',
+                    keywords: $(this).attr('data-keywords') || '',
+                    inline: $(this).attr('data-inline') === 'true',
+                    letterCase: $(this).attr('data-letterCase') || 'lowercase',
+                    opacity: $(this).attr('data-opacity'),
+                    position: $(this).attr('data-position') || 'bottom left',
+                    swatches: $(this).attr('data-swatches') ? $(this).attr('data-swatches').split('|') : [],
+                    change: function(value, opacity) {
+                        if( !value ) return;
+                        if( opacity ) value += ', ' + opacity;
+                        if( typeof console === 'object' ) {
+                            // console.log(value);
+                        }
+                    },
+                    theme: 'bootstrap'
+                });
+            });
+    });
+</script> 
+	<script src="js/fileSaver.min.js"></script>
+	<script src="js/canvas-toBlob.js"></script>
+	<script src="js/jquery.minicolors.min.js"></script>
+	<script src="js/main.js"></script>
 </body>
 </html>

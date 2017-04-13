@@ -1,147 +1,153 @@
-
-
+var type = 1;
 var margin = {top: 10,left: 10,bottom: 10,right: 10};
 var width = $("#main").width();
 	width = width - margin.left - margin.right;
-var mapRatio = 0.86;
+var mapRatio = 0.75;
 var height = width * mapRatio;
 var mapRatioAdjuster = 0.1;
-var chinaCenter = [105, 36];
+var chinaCenter = [105, 35];
 
 var projection = d3.geo.mercator().center(chinaCenter).translate([width / 2, height / 2]).scale(width * mapRatio);
 var path = d3.geo.path().projection(projection);
 
-//设置三个面板的高度
-d3.select("#main").style("height", height + "px");
-d3.select("#workspace").style("height", (height - 10) + "px");
-d3.select("#table").style("height", (height - 10) + "px");
 
 var indexCol = 1, 	//表格列数
 	values = [],	//一列表格数据 地区名称-数据
 	valuesNum = [];	//一列表格数据 数据
 
-var request =  GetRequest();
-var type = request["type"];
-csv = request["data"];
-var csvdata = d3.csv.parse(csv);
-var titles = d3.keys(csvdata[0]);
-var thLenght = titles.length;
+var csvdata = [];
 
-
-//颜色拾取器
-$('.colorPick').each(function() {
-    $(this).minicolors({
-        control: $(this).attr('data-control') || 'hue',
-        defaultValue: $(this).attr('data-defaultValue') || '',
-        inline: $(this).attr('data-inline') === 'true',
-        letterCase: $(this).attr('data-letterCase') || 'lowercase',
-        position: $(this).attr('data-position') || 'bottom left',
-        theme: 'default'
-    });
-});
-
-
-//工具箱初始化及数据监听
-var bgColor = $("#type"+type+" .bgColor").val();
-$("#type"+type+" .bgColor").change(function(){
-	bgColor = $("#type"+type+" .bgColor").val();
-	chooseMap();
-})
-var mapColor = $("#type"+type+" .mapColor").val();
-$("#type"+type+" .mapColor").change(function(){
-	mapColor = $("#type"+type+" .mapColor").val();
-	chooseMap();
-})
-var opacity = $("#type"+type+" .opacity").val();
-$("#type"+type+" .opacity").change(function(){
-	opacity = $("#type"+type+" .opacity").val();
-	chooseMap();
-})
-
-
-//省级等级符号地图 工具箱初始化
-var circleNum = $("#type3 select").val();	//省级等级符号地图 符号个数
-$("#type3 .moreColor .minicolors:gt("+(circleNum-1)+")").hide();
-$("#type3 select").change(function(){
-	circleNum = $("#type3 select").val();
-	$("#type3 .moreColor .minicolors").show();
-	$("#type3 .moreColor .minicolors:gt("+(circleNum-1)+")").hide();
-})
-var circleColor = [];
-$("#type3 .moreColor .minicolors .colorPick").each(function(){
-    circleColor.push($(this).val());
-});
-circleColor = circleColor.slice(0, circleNum);
-$("#type3 .moreColor .minicolors .colorPick").change(function(){
-	circleColor.length = 0;
-	$("#type3 .moreColor .minicolors input[type='text']").each(function(){
-	    circleColor.push($(this).val());
+var parameter = [];
+$("#type-select").change(function(){
+	type = $(this).find("option:selected").attr("title");
+	$("#type"+type).show().siblings().hide();
+	$("#type"+type+" input").each(function(key,value){
+     	parameter[key] = $(this).val();
+     	for(var i = 0 ;i<parameter.length;i++){
+	         if(parameter[i] == "" || typeof(parameter[i]) == "undefined"){
+	                  parameter.splice(i,1);
+	                  i= i-1;	              
+	         }           
+		 }
 	});
-	if (circleColor[circleNum-1] !== "") {
-		circleColor = circleColor.slice(0, circleNum);
-		chooseMap();
-	}
-})
-
-
-//省级柱状统计地图 工具箱初始化
-var barWidth = $("#type"+type+" .barWidth").val();
-$("#type"+type+" .barWidth").change(function(){
-	barWidth = Number($("#type"+type+" .barWidth").val());
-	chooseMap();
-});
-var maxBarHeight = $("#type"+type+" .maxBarHeight").val();
-$("#type"+type+" .maxBarHeight").change(function(){
-	maxBarHeight = Number($("#type"+type+" .maxBarHeight").val());
-	chooseMap();
-});
-var barColor = $("#type"+type+" .barColor").val();
-$("#type"+type+" .barColor").change(function(){
-	barColor = $("#type"+type+" .barColor").val();
+	circle = $(".circle").val(); 
+	$("#type3 .minicolors:gt("+(circle-1)+")").hide();
+	$("#type5 .minicolors:gt("+(titles.length-1)+")").hide();
+	$("#type6 .minicolors:gt("+(titles.length-1)+")").hide();
 	chooseMap();
 });
 
-
-//省级饼状对比地图 工具箱初始化
-$("#type5 .moreColor .minicolors:gt("+(thLenght-2)+")").hide();
-var pointColor = $("#type5 .pointColor").val();
-$("#type5 .pointColor").change(function(){
-	pointColor = $("#type5 .pointColor").val();
-	chooseMap();
+var main = [];
+$("#collapse1 input").each(function(key,value){
+     main[key] = $(this).val();
 });
-var pieColor = [];
-$("#type5 .moreColor .minicolors .colorPick").each(function(){
-    pieColor.push($(this).val());
-});
-pieColor = pieColor.slice(0, thLenght);
-$("#type5 .moreColor .minicolors .colorPick").change(function(){
-	pieColor.length = 0;
-	$("#type5 .moreColor .minicolors input[type='text']").each(function(){
-	    pieColor.push($(this).val());
+$("#collapse1 input").change(function(){
+	$("#collapse1 input").each(function(key,value){
+     	main[key] = $(this).val();
 	});
-	if (pieColor[thLenght-2] !== "") {
-		pieColor = pieColor.slice(0, thLenght);
-		chooseMap();
+	chooseMap();
+});
+
+$("#collapse2 input").change(function(){
+	parameter.length = 0;
+	$("#collapse2 input:visible").each(function(key,value){
+     	parameter[key] = $(this).val();
+	});
+	chooseMap();
+});
+$(".circle").change(function(){
+	circle = $(".circle").val(); 
+	$("#type3 .minicolors").show();
+	$("#type3 .minicolors:gt("+(circle-1)+")").hide();
+});
+
+
+$("#reset").click(function(){
+	window.location.reload();
+});
+$('#upload').bind('change', handleFileSelect);
+function handleFileSelect(evt) {
+  var files = evt.target.files;
+  var file = files[0];
+  getTableData(file);
+}
+function getTableData(file) {
+  var reader = new FileReader();
+  reader.readAsText(file);
+  reader.onload = function(event){
+   	csv = event.target.result;
+   	csvdata = d3.csv.parse(csv);
+   	showTable();
+  };
+  reader.onerror = function(){ alert('Unable to read' + file.fileName); };
+}
+
+
+
+function showTable() {
+	var sortAscending = true;
+	var table = d3.select('#table').append('table').attr("class","table table-striped table-bordered table-hover table-condensed");
+	titles = d3.keys(csvdata[0]);
+	var headers = table.append('thead').append('tr').selectAll('th').data(titles).enter().append('th').text(function(d) {
+		return d
+	}).on('click',function(d) {
+		if (sortAscending) {
+			rows.sort(function(a, b) {
+				return sort(b[d], a[d])
+			});
+			sortAscending = false;
+			this.className = 'aes';
+			$(this).siblings().removeClass();
+		} else {
+			rows.sort(function(a, b) {
+				return sort(a[d], b[d])
+			});
+			sortAscending = true;
+			this.className = 'des';
+			$(this).siblings().removeClass();
+		}
+		var innertext = this.innerText;
+		for (var i = 0; i < titles.length; i++) {
+			if (titles[i] == innertext) {
+				indexCol = i;
+				chooseMap();
+			}
+		}
+	});
+	var rows = table.append('tbody').selectAll('tr').data(csvdata).enter().append('tr');
+	rows.selectAll('td').data(function(d) {
+		return titles.map(function(k) {
+			return {
+				'value': d[k],
+				'name': k
+			}
+		})
+	}).enter().append('td').attr('data-th',function(d) {
+		return d.name
+	}).text(function(d) {
+		return d.value
+	});
+	$("#type5 .minicolors:gt("+(titles.length-1)+")").hide();
+	$("#type6 .minicolors:gt("+(titles.length-1)+")").hide();
+	chooseMap();
+}
+
+function sort(a, b) {
+	if (isNaN(Number(a))) {
+		return a > b ? 1 : a == b ? 0 : -1
+	} else {
+		a = Number(a);
+		b = Number(b);
+		return a > b ? 1 : a == b ? 0 : -1
 	}
-})
-
-
-//省级柱状对比地图 工具箱初始化
-$("#type6 .moreColor .minicolors:gt("+(thLenght-2)+")").hide();
+}
 
 
 d3.json("/data/china.json",function(t, e) {			//读取地图数据，绘制地图
 	if (t) return console.error(t);
 	geodata = topojson.feature(e, e.objects.china);
-	d3.select("#type"+type).style("display","block");	//根据选择的地图类型，显示对应的工具箱
 	chooseMap();
 });
-
-
-$(".reset").click(function(){
-	window.location.reload()
-})
-
 
 function chooseMap() {
 	if (type == 1) {
@@ -164,15 +170,15 @@ function chooseMap() {
 		drawContrastBar();
 	}
 }
-
-
 function showMap() {
 	getValues(csvdata,indexCol);
 	d3.selectAll('svg').remove();
-	svg = d3.select("#main").append("svg").attr("width", width).attr("height", height).style("background-color", bgColor).call(zoom);
+	svg = d3.select("#main").append("svg").attr("width", width).attr("height", height).style("background-color", main[0]).call(zoom);
 	china = svg.append("g");
+	titles = d3.keys(csvdata[0]);
+	thLenght = titles.length;
 	provinces = china.selectAll("path").data(geodata.features).enter().append("path")
-				.attr("d", path).attr("fill", mapColor).attr("stroke", "#fff").attr("stroke-width", .2)
+				.attr("d", path).attr("fill", main[1]).style("opacity", main[2]).attr("stroke", main[4]).attr("stroke-width", main[3])
 				.on("mousemove",function(t) {
 					d3.select("#tooltip").style("top", d3.event.pageY + 10 + "px").style("left", d3.event.pageX + 20 + "px").select("#data-name-tooltip").text(t.properties.name),
 					d3.select("#tooltip").select("#data-value-tooltip").text(values[t.properties.name]),
@@ -195,25 +201,14 @@ function showMap() {
 		return "translate(" + (path.centroid(d)[0] - 10) + "," + path.centroid(d)[1] + ")"
 	}).text(function(d) {
 		return d.properties.name
-	}).attr("font-size", 12);
+	}).attr("font-size", main[5]);
 	china.append("svg:image").attr("xlink:href", "images/southchinasea.png").attr({
-		x: width * 0.8,
-		y: height * 0.8,
+		x: width * 0.75,
+		y: height * 0.73,
 		"width": 50,
 		"height": 70
 	});
 }
-
-function sort(a, b) {
-	if (isNaN(Number(a))) {
-		return a > b ? 1 : a == b ? 0 : -1
-	} else {
-		a = Number(a);
-		b = Number(b);
-		return a > b ? 1 : a == b ? 0 : -1
-	}
-}
-
 function transform(obj) {
 	var arr = [];
 	for (var item in obj) {
@@ -236,13 +231,14 @@ function zoomed() {
 	china.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")")
 }
 
+
 function drawColor() {
 	getValues(csvdata,indexCol);
 	var maxvalue = d3.max(valuesNum);
 	var minvalue = d3.min(valuesNum);
 	var linear = d3.scale.linear().domain([minvalue, maxvalue]).range([0, 1]);
-	var a = pColor[1];
-	var b = pColor[0];
+	var a = parameter[1];
+	var b = parameter[0];
 	var computeColor = d3.interpolate(a, b);
 	provinces.style("fill", function(d,i){
 				var t = linear( values[d.properties.name] );
@@ -253,11 +249,11 @@ function drawColor() {
 	var linearGradient = defs.append("linearGradient").attr("id", "linearColor").attr("x1", "0%").attr("y1", "0%").attr("x2", "100%").attr("y2", "0%");
 	var stop1 = linearGradient.append("stop").attr("offset", "0%").style("stop-color", a);
 	var stop2 = linearGradient.append("stop").attr("offset", "100%").style("stop-color", b);
-	var colorRect = svg.append("rect").attr("x", 20).attr("y", 490).attr("width", 150).attr("height", 30).style("fill", "url(#" + linearGradient.attr("id") + ")");
-	var minValueText = svg.append("text").attr("x", 20).attr("y", 490).attr("dy", "-0.3em").text(function() {
+	var colorRect = svg.append("rect").attr("x", parameter[2]).attr("y", parameter[3]).attr("width", parameter[4]).attr("height", parameter[5]).style("fill", "url(#" + linearGradient.attr("id") + ")");
+	var minValueText = svg.append("text").attr("x", parameter[2]).attr("y", parameter[3]).attr("dy", "-0.3em").text(function() {
 		return minvalue;
 	});
-	var maxValueText = svg.append("text").attr("x", 160).attr("y", 490).attr("dy", "-0.3em").text(function() {
+	var maxValueText = svg.append("text").attr("x", Number(parameter[2])+Number(parameter[4])-10).attr("y", parameter[3]).attr("dy", "-0.3em").text(function() {
 		return maxvalue;
 	})
 }
@@ -267,29 +263,41 @@ function drawCircle() {
 	// d3.selectAll('text').remove();
 	var maxvalue = d3.max(valuesNum);
 	var minvalue = d3.min(valuesNum);
-	var valueArray = getValueArray(maxvalue, minvalue, circleNum);
+	var valueArray = getValueArray(maxvalue, minvalue, circle);
 
-	changeColorStyle(circleNum);
+	china.selectAll("circle").data(geodata.features).enter().append("circle").attr("transform",function(d) {
+			return "translate(" + (path.centroid(d)[0] + 5) + "," + path.centroid(d)[1] + 10 + ")"
+		}).attr("r",function(d, i) {
+			var t = values[d.properties.name];
+			var radius = computeRadius(valueArray, t);
+			return radius.toString();
+		}).attr("fill",function(d, i) {
+			var t = values[d.properties.name];
+			var color = computeColor(valueArray, t);
+			return color;
+		}).style("opacity", parameter[circle]);
+	drawRectText(circle, valueArray);
 
-	function getValueArray(max, min, circleNum) {
+	function getValueArray(max, min, circle) {
 		var arr = [];
 		arr[0] = min;
-		interval = Math.floor((maxvalue - minvalue + 1) / circleNum);
-		for (var i = 1; i < circleNum; i++) {
+		interval = Math.floor((maxvalue - minvalue + 1) / circle);
+		for (var i = 1; i < circle; i++) {
 			arr[i] = arr[i - 1] + interval
 		}
 		return arr;
 	}
 	function computeColor(valueArray, t) {
 		var rColor;
+		console.log(parameter)
 		for (var i = 0; i < valueArray.length; i++) {
 			var min = valueArray[i];
 			var max = valueArray[i + 1];
 			if (t >= min && t < max) {
-				rColor = circleColor[i];
+				rColor = parameter[i];
 				break;
 			}
-			rColor = circleColor[valueArray.length - 1]
+			rColor = parameter[valueArray.length - 1]
 		}
 		return rColor;
 	}
@@ -303,29 +311,19 @@ function drawCircle() {
 		}
 		return radius
 	}
-	function changeColorStyle(circleNum) {
-		china.selectAll("circle").data(geodata.features).enter().append("circle").attr("transform",function(d) {
-			return "translate(" + (path.centroid(d)[0] + 5) + "," + path.centroid(d)[1] + 10 + ")"
-		}).attr("r",function(d, i) {
-			var t = values[d.properties.name];
-			var radius = computeRadius(valueArray, t);
-			return radius.toString();
-		}).attr("fill",function(d, i) {
-			var t = values[d.properties.name];
-			var color = computeColor(valueArray, t);
-			return color;
-		}).style("opacity", opacity);
-		drawRectText(circleNum, valueArray);
-	}
-	function drawRectText(circleNum, valueArray) {
-		var cx = 20;
-		var cy = 20;
-		for (var i = 0; i < circleNum; i++) {
-			svg.append("rect").attr("x", cx).attr("y", cy).attr("width", 30).attr("height", 15).style("fill", computeColor(valueArray, valueArray[i]));
-			svg.append("text").attr("x", cx + 35).attr("y", cy + 15).text(function() {
+	function drawRectText(circle, valueArray) {
+		var cx = Number(parameter[parameter.length-6]);
+		var cy = Number(parameter[parameter.length-5]);
+		var cWidth = Number(parameter[parameter.length-4]);
+		var cHeight = Number(parameter[parameter.length-3]);
+		var xStep = Number(parameter[parameter.length-2]);
+		var yStep = Number(parameter[parameter.length-1]);
+		for (var i = 0; i < circle; i++) {
+			svg.append("rect").attr("x", cx).attr("y", cy).attr("width", cWidth).attr("height",cHeight).style("fill", computeColor(valueArray, valueArray[i]));
+			svg.append("text").attr("x", cx + cWidth + xStep).attr("y", cy + cHeight).text(function() {
 				return valueArray[i] + " ~ " + (valueArray[i] + interval - 1)
 			});
-			cy = cy + 20;
+			cy = cy + yStep;
 		}
 	}
 }
@@ -336,18 +334,21 @@ function drawBar(){
 	var maxvalue = d3.max(valuesNum);
 	var minvalue = d3.min(valuesNum);
 
+	var maxBarHeight = Number(parameter[1]);
+	var barWidth = Number(parameter[0]);
+
 	var ratio = (maxvalue-minvalue)/maxBarHeight;
 
 	china.selectAll("rect").data(geodata.features).enter().append("rect").attr("transform",function(d) {
 			var t = values[d.properties.name];
 			return "translate(" + (path.centroid(d)[0]) + "," + (path.centroid(d)[1]-computebarHeight(t)) + ")"
 		}).attr("width", barWidth+"px")
-		.attr("fill",barColor)
+		.attr("fill",parameter[2])
 		.attr("height", function(d) {
 			var t = values[d.properties.name];
 			var barheight = computebarHeight(t);
           	return barheight+"px";
-         }).style("opacity", opacity);
+         }).style("opacity", parameter[3]);
 		function computebarHeight(t) {
 			if (t) {
 	      	    return (t-minvalue)/ratio;
@@ -375,14 +376,13 @@ function drawPie(){
 		.attr("visibility", "hidden");
 
 	points.append("circle")
-		.attr("r",5)
+		.attr("r",parameter[2])
 		.attr("visibility","visible")
 		.on("click", function(d,i) { 
 			d3.selectAll(".toggle"+i).attr('visibility','visible');	
 		})
 		.style("display","inline")
-		.style("cursor","pointer").attr("fill",pointColor);
-		console.log(pointColor)
+		.style("cursor","pointer").attr("fill",parameter[0]).attr("opacity",parameter[1]);
 
 	var pies = points.selectAll(".pies").data(function(d) { 
 			var placename = d.properties.name;
@@ -400,36 +400,34 @@ function drawPie(){
 		.append('g')
 		.attr('class','arc');
 
-	var piepath = pies.append("path")
-	  .attr('d',arc)
-      .attr("fill",function(d,i){ return pieColor[i]; })
-      .on("mousemove",function(d,i) {
-      	console.log(d);
+	var piepath = pies.append("path").attr('d',arc)
+      .attr("fill",function(d,i){ return parameter[i+3];})
+      .on("click",function(d,i) {
 		d3.select("#tooltip").style("top", d3.event.pageY + 10 + "px").style("left", d3.event.pageX + 20 + "px")
-		  .select("#data-value-tooltip").text(
+		 .select("#data-value-tooltip").text(
 				function(){
 					var a = (d.endAngle - d.startAngle)/(2*Math.PI);
 					return a.toFixed(2)+"%";
-
 				});
 		d3.select("#tooltip").select("#data-name-tooltip").text(d.value);
 		d3.select("#data-value").text("占比");
 		d3.select("#data-name").text(titles[i+1]);
 		d3.select("#tooltip").classed("hidden", !1);
-	}).on("mouseout",function() {
-		d3.select("#tooltip").classed("hidden", !0)
 	});
-
-    drawPieRectText(titles, pieColor);
-    function drawPieRectText(titles, pieColor) {
-		var cx = 20;
-		var cy = 20;
+    drawPieRectText(titles, parameter);
+    function drawPieRectText(titles, parameter) {
+		var cx = Number(parameter[parameter.length-6]);
+		var cy = Number(parameter[parameter.length-5]);
+		var cWidth = Number(parameter[parameter.length-4]);
+		var cHeight = Number(parameter[parameter.length-3]);
+		var xStep = Number(parameter[parameter.length-2]);
+		var yStep = Number(parameter[parameter.length-1]);
 		for (var i = 1; i < titles.length; i++) {
-			svg.append("rect").attr("x", cx).attr("y", cy).attr("width", 30).attr("height", 15).style("fill", pieColor[i-1]);
-			svg.append("text").attr("x", cx + 35).attr("y", cy + 15).text(function() {
+			svg.append("rect").attr("x", cx).attr("y", cy).attr("width", cWidth).attr("height", cHeight).style("fill", parameter[i+2]);
+			svg.append("text").attr("x", cx + cWidth + xStep).attr("y", cy + cHeight).text(function() {
 				return titles[i]
 			});
-			cy = cy + 20;
+			cy = cy + yStep;
 		}
 	}
 }
@@ -440,6 +438,7 @@ function drawPie(){
 
 
 function drawContrastBar(){
+	console.log(parameter)
 	var tabledata = getTableContent("#table");
 	function getTableContent(id){
 	    var mytable = $("#table table")[0];
@@ -457,17 +456,11 @@ function drawContrastBar(){
 	}
 	var maxvalue = d3.max(tabledata);
 	var minvalue = d3.min(tabledata);
-	console.log(maxBarHeight)
-	var barwidth = 15;
 
 	var bin_num = titles.length-1;  
-	histogram=d3.layout.histogram()  
-	    .range(titles) //区间范围  
-	    .bins(bin_num) //分隔数  
-	    // .frequency(true)//true:统计个数；false:统计概率  
 
-	var max_height = maxBarHeight;  
-	var rect_step = barwidth;  
+	var maxBarHeight = Number(parameter[4]);  
+	var rect_step = Number(parameter[3]); ;  
 	 
 	var yScale = d3.scale.linear()
 				  .domain([0, maxvalue])
@@ -491,13 +484,13 @@ function drawContrastBar(){
 		.attr("visibility", "hidden");
 
 	points.append("circle")
-		.attr("r",5)
+		.attr("r",parameter[2])
 		.attr("visibility","visible")
 		.on("click", function(d,i) { 
 			d3.selectAll(".toggle"+i).attr('visibility','visible');	
 		})
 		.style("display","inline")
-		.style("cursor","pointer");
+		.style("cursor","pointer").attr("fill",parameter[0]).attr("opacity",parameter[1]);
 
 		var bars = points.selectAll(".bars").data(function(d) { 
 			var placename = d.properties.name;
@@ -526,7 +519,7 @@ function drawContrastBar(){
         .attr("height", function(d){  
             return computebarHeight(d);  
         })  
-        .attr("fill",function(d,i){return pieColor[i]})
+        .attr("fill",function(d,i){return parameter[i+5]})
         .on("mousemove",function(d,i) {
 			d3.select("#tooltip").style("top", d3.event.pageY + 10 + "px").style("left", d3.event.pageX + 20 + "px")
 			  .select("#data-value-tooltip").text(d);
@@ -536,21 +529,23 @@ function drawContrastBar(){
 			d3.select("#tooltip").classed("hidden", !0)
 		});
 
-		drawPieRectText(titles, pieColor);
-    function drawPieRectText(titles, pieColor) {
-		var cx = 20;
-		var cy = 20;
+		drawPieRectText(titles, parameter);
+    function drawPieRectText(titles, parameter) {
+		var cx = Number(parameter[parameter.length-6]);
+		var cy = Number(parameter[parameter.length-5]);
+		var cWidth = Number(parameter[parameter.length-4]);
+		var cHeight = Number(parameter[parameter.length-3]);
+		var xStep = Number(parameter[parameter.length-2]);
+		var yStep = Number(parameter[parameter.length-1]);
 		for (var i = 1; i < titles.length; i++) {
-			svg.append("rect").attr("x", cx).attr("y", cy).attr("width", 30).attr("height", 15).style("fill", pieColor[i-1]);
-			svg.append("text").attr("x", cx + 35).attr("y", cy + 15).text(function() {
+			svg.append("rect").attr("x", cx).attr("y", cy).attr("width", cWidth).attr("height", cHeight).style("fill", parameter[i+4]);
+			svg.append("text").attr("x", cx + cWidth + xStep).attr("y", cy + cHeight).text(function() {
 				return titles[i]
 			});
-			cy = cy + 20;
+			cy = cy + yStep;
 		}
 	}
-
 }
-
 
 
 
@@ -627,52 +622,4 @@ function svgString2Image(svgString, width, height, format, callback) {
 		})
 	};
 	image.src = imgsrc;
-}
-
-
-
-
-function showTable() {
-	var sortAscending = true;
-	var table = d3.select('#table').append('table');
-	titles = d3.keys(csvdata[0]);
-	var headers = table.append('thead').append('tr').selectAll('th').data(titles).enter().append('th').text(function(d) {
-		return d
-	}).on('click',function(d) {
-		if (sortAscending) {
-			rows.sort(function(a, b) {
-				return sort(b[d], a[d])
-			});
-			sortAscending = false;
-			this.className = 'aes';
-			$(this).siblings().removeClass();
-		} else {
-			rows.sort(function(a, b) {
-				return sort(a[d], b[d])
-			});
-			sortAscending = true;
-			this.className = 'des';
-			$(this).siblings().removeClass();
-		}
-		var innertext = this.innerText;
-		for (var i = 0; i < titles.length; i++) {
-			if (titles[i] == innertext) {
-				indexCol = i;
-				chooseMap();
-			}
-		}
-	});
-	var rows = table.append('tbody').selectAll('tr').data(csvdata).enter().append('tr');
-	rows.selectAll('td').data(function(d) {
-		return titles.map(function(k) {
-			return {
-				'value': d[k],
-				'name': k
-			}
-		})
-	}).enter().append('td').attr('data-th',function(d) {
-		return d.name
-	}).text(function(d) {
-		return d.value
-	});
 }
