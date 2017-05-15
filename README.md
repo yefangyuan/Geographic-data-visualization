@@ -1,2 +1,2 @@
 # Geographic-data-visualization
-基于D3的地理信息可视化系统的设计
+基于D3的统计数据地图可视化系统

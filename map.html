@@ -31,7 +31,8 @@
             </div>
         </form>
         <form class="navbar-form navbar-left">
-            <a href="javascript:;" class="file">上传数据<input type="file" id="upload"></a>
+            <!-- accept=".csv"：只显示指定文件类型,即csv格式文件 -->
+            <a href="javascript:;" class="file">上传数据<input type="file" id="upload" accept=".csv"></a>   
             <a href="javascript:;" id="reset" class="btn btn-default">清空</a>
             <a href="javascript:;" id="save" class="btn btn-default">另存为图片</a>
         </form>
@@ -121,13 +122,38 @@
                         <option value="5">5&nbsp;&nbsp;级</option>
                     </select>
                 </div>
+                <span class="label label-primary">分级界限（从小到大）</span>
+                <div class="input-group input-group-md level">
+                    <span class="input-group-addon">最小值</span>
+                    <input type="text" class="form-control" value="0">
+                </div>
+                <div class="input-group input-group-md level">
+                    <span class="input-group-addon">第一级</span>
+                    <input type="text" class="form-control" value="0">
+                </div>
+                <div class="input-group input-group-md level">
+                    <span class="input-group-addon">第二级</span>
+                    <input type="text" class="form-control" value="0">
+                </div>
+                <div class="input-group input-group-md level">
+                    <span class="input-group-addon">第三级</span>
+                    <input type="text" class="form-control" value="0">
+                </div>
+                <div class="input-group input-group-md level">
+                    <span class="input-group-addon">第四级</span>
+                    <input type="text" class="form-control" value="0">
+                </div>
+                <div class="input-group input-group-md level">
+                    <span class="input-group-addon">第五级</span>
+                    <input type="text" class="form-control" value="0">
+                </div>
                 <span class="label label-primary">分段颜色</span>
                 <div class="form-group">
-                    <input type="text" class="form-control colorPick" value="#016FDD">
-                    <input type="text" class="form-control colorPick" value="#CC0000">
-                    <input type="text" class="form-control colorPick">
-                    <input type="text" class="form-control colorPick">
-                    <input type="text" class="form-control colorPick">
+                    <input type="text" class="form-control colorPick" value="#FF4040">
+                    <input type="text" class="form-control colorPick" value="#EEC900">
+                    <input type="text" class="form-control colorPick" value="#D1EEEE">
+                    <input type="text" class="form-control colorPick" value="#A020F0">
+                    <input type="text" class="form-control colorPick" value="#87CEEB">
                     <input type="range" value="0.8" class="opacity" max="1" min="0" step="0.1" />
                 </div>
                 <span class="label label-primary">脚注</span>
