@@ -22,11 +22,12 @@
             <div class="form-group">
                 <select class="form-control" id="type-select">
                     <option title="1">省级标准标记地图</option>
-                    <option title="2">省级分段设色地图</option>
+                    <option title="2">省级渐变设色地图</option>
                     <option title="3">省级等级符号地图</option>
                     <option title="4">省级柱状统计地图</option>
                     <option title="5">省级饼状对比地图</option>
                     <option title="6">省级柱状对比地图</option>
+                    <option title="7">省级设色柱状混合地图</option>
                 </select>
             </div>
         </form>
@@ -322,6 +323,61 @@
                     <span class="input-group-addon">Y间距</span>
                     <input type="text" class="form-control" value="20">
                     <span class="input-group-addon">px</span>
+                </div>
+            </div>
+            <div class="accordion-inner" id="type7"  style="display: none;">
+                <span class="label label-primary">渐变设色数据</span>
+                <div class="form-group">
+                    <select class="color-select"></select>
+                </div>
+                <span class="label label-primary">柱状统计数据</span>
+                <div class="form-group">
+                    <select class="bar-select"></select>
+                </div>
+                <span class="label label-primary">最深填充颜色</span>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#016FDD" />
+                </div>
+                <span class="label label-primary">最浅填充颜色</span>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#F7F7F7" />
+                </div>
+                <span class="label label-primary">脚注偏移</span>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">X轴</span>
+                    <input type="text" class="form-control" value="50">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">Y轴</span>
+                    <input type="text" class="form-control" value="450">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <span class="label label-primary">脚注宽高</span>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">宽度</span>
+                    <input type="text" class="form-control" value="150">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">高度</span>
+                    <input type="text" class="form-control" value="30">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <span class="label label-primary">单柱</span>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">宽度</span>
+                    <input type="text" class="form-control" value="12">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">最大高度</span>
+                    <input type="text" class="form-control" value="50">
+                    <span class="input-group-addon">px</span>
+                </div>
+                <div class="form-group">
+                    <input type="text"  class="form-control colorPick" value="#E6162D">
+                    <input type="range" value="1" class="opacity" max="1" min="0" step="0.1" />
                 </div>
             </div>
         </div>

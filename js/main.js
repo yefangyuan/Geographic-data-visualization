@@ -18,7 +18,8 @@ var path = d3.geo.path().projection(projection);
 var index = 1, 	//显示地图使用的表格的列数，默认第一列
 	values = [],	//一列表格数据，格式为：地区名称-数据，形如：values["上海"] = 2415；
 	valuesNum = [],	 //一列表格数据，格式为：数据，形如：[211, 1547, ……]
-	csvdata = [];	//对象数组，每个对象表示一行表格数据
+	csvdata = [],	//对象数组，每个对象表示一行表格数据
+	bindex = 1;
 var parameter = [],		//子配置
 	main = [];		//主配置
 
@@ -43,6 +44,15 @@ $("#type-select").change(function(){
 	//隐藏多余的颜色拾取器
 	$("#type3 .minicolors:gt("+(circle-1)+")").hide();
 	$("#type3 .level:gt("+(circle)+")").hide();
+	titles = d3.keys(csvdata[0]);
+	var sL = $(".color-select option").size();
+	console.log(titles)
+	if (titles.length!=0 && sL==0) {
+		for (var i = 1; i < titles.length; i++) {
+			$(".color-select").append("<option value='"+i+"'>"+titles[i]+"</option>");
+			$(".bar-select").append("<option value='"+i+"'>"+titles[i]+"</option>");
+		}
+	}
 	chooseMap();	//显示地图
 });
 
@@ -74,13 +84,23 @@ $(".circle").change(function(){
 	$("#type3 .minicolors:gt("+(circle-1)+")").hide();	//隐藏不必要的颜色拾取器
 	$("#type3 .level").show();		//显示所有分级输入框
 	$("#type3 .level:gt("+(circle)+")").hide();		//隐藏不必要的分级输入
-
-
 	chooseMap();
 });
 //当地图类型为3时，分级界限发生改变时，设置flag为1，以确定自行设置分级界限
 $("#type3 .level input").change(function(){
 	flag = 1;
+});
+
+//当地图类型为7时
+$(".color-select").change(function(){
+	index = $(".color-select").val(); 
+	bindex = $(".bar-select").val(); 
+	chooseMap();
+});
+$(".bar-select").change(function(){
+	index = $(".color-select").val(); 
+	bindex = $(".bar-select").val(); 
+	chooseMap();
 });
 
 //刷新页面
@@ -108,7 +128,8 @@ function getTableData(file) {
   	reader.onload = function(event){	//读取文件成功结束后触发load事件
    		csv = event.target.result;
    		csvdata = d3.csv.parse(csv);  //解析CSV文件，返回一个代表解析行的对象数组
-   		showTable();	
+   		showTable();
+   		$("#type-select").trigger("change");	//自动触发change事件
   	};
   	reader.onerror = function(){ alert("读取文件" + file.fileName + "失败！"); };
 }
@@ -166,7 +187,6 @@ function showTable() {
 	.text(function(d) {
 		return d.value;		//这里的d是对象，形如：{name:"2014年",value:"4754"}
 	});
-
 	chooseMap();
 }
 
@@ -196,10 +216,9 @@ function chooseMap() {
 	titles = d3.keys(csvdata[0]);
 	$("#type5 .minicolors:gt("+(titles.length-1)+")").hide();
 	$("#type6 .minicolors:gt("+(titles.length-1)+")").hide();
-
 	if (type == 1) {
 		showMap();
-	} else if (type == 2) {
+	}else if (type == 2) {
 		showMap();
 		drawColor();
 	} else if (type == 3) {
@@ -207,14 +226,20 @@ function chooseMap() {
 		drawCircle();
 	}else if(type == 4){
 		showMap();
-		drawBar();
+		drawBar(index,parameter);
 	}
-	else if(type==5){
+	else if(type== 5){
 		showMap();
 		drawPie();
-	}else if(type ==6){
+	}else if(type == 6){
 		showMap();
 		drawContrastBar();
+	}else if (type == 7) {
+		showMap();
+		drawColorBar();
+	}else if (type == 7) {
+		showMap();
+		drawColorCircle();
 	}
 }
 function showMap() {
@@ -317,7 +342,6 @@ function getValues(csvdata,index) {
 
 function drawColor() {
 	getValues(csvdata,index);	//获取表格第index列的数据
-
 	var maxvalue = d3.max(valuesNum);
 	var minvalue = d3.min(valuesNum);
 	var linear = d3.scale.linear()	//构建一个线性比例尺
@@ -481,27 +505,28 @@ function drawCircle() {
 }
 
 
-function drawBar(){
+function drawBar(index,parameter){
 	getValues(csvdata,index);
 	var maxvalue = d3.max(valuesNum);
 	var minvalue = d3.min(valuesNum);
 	var maxBarHeight = Number(parameter[1]);
 	var barWidth = Number(parameter[0]);
-
 	var linear = d3.scale.linear()	//构建一个线性比例尺
 					.domain([minvalue, maxvalue])	//设置比例尺的定义域
 					.range([0, 1]);		//设置比例尺的输出范围
 	//返回一个0，maxBarHeight两个数字之间的数字插值器
-	var computebarHeight = d3.interpolateNumber(0, maxBarHeight);	
+	var computebarHeight = d3.interpolateNumber(0, maxBarHeight);
 	china.selectAll("rect").data(geodata.features).enter().append("rect")
 		.attr("transform",function(d) {
 			var t = values[d.properties.name];
+
 			if(t == "" || typeof(t) == "undefined"){
 				adjust = 0;
 			}else{
 				var x = linear(t);
 				adjust = computebarHeight(x);
 			}
+
 			return "translate(" + (path.centroid(d)[0]) + "," 
 								+ (path.centroid(d)[1]-adjust) + ")"
 		}).attr("width", barWidth+"px")
@@ -515,8 +540,21 @@ function drawBar(){
 				var barheight = computebarHeight(x);
 	          	return barheight+"px";
 			}
-         }).style("opacity", parameter[3]);
-
+        }).style("opacity", parameter[3])
+        .on("mousemove",function(t) {	//提示框
+			d3.select("#tooltip").style("top", d3.event.pageY + 10 + "px")
+								.style("left", d3.event.pageX + 20 + "px")
+								.select("#data-name-tooltip")
+								.text(t.properties.name),
+			d3.select("#tooltip").select("#data-value-tooltip").text(function(){
+				return values[t.properties.name];
+			}),
+			d3.select("#data-name").text(titles[0]),
+			d3.select("#data-value").text(titles[index]),
+			d3.select("#tooltip").classed("hidden", !1)
+		}).on("mouseout",function() {
+			d3.select("#tooltip").classed("hidden", !0)
+		});;
 }
 
 function drawPie(){	
@@ -718,6 +756,11 @@ function drawContrastBar(){
 			cy = cy + yStep;
 		}
 	}
+}
+function drawColorBar(){
+	drawColor();
+	var para = parameter.slice(-4);
+	drawBar(bindex,para);
 }
 
 
